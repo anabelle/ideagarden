@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -17,10 +18,10 @@ export default function Home() {
           </p>
 
           <div className={styles.cta}>
-            <button className="btn btn--primary btn--lg">
+            <Link href="/garden" className="btn btn--primary btn--lg">
               Start Planting
               <span className={styles.ctaEmoji}>🌿</span>
-            </button>
+            </Link>
             <button className="btn btn--lg">
               Learn More
             </button>

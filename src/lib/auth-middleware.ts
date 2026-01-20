@@ -10,7 +10,7 @@ import { auth } from '@/lib/auth';
 export type AuthResult = {
     userId: string;
 } | {
-    error: NextResponse;
+    error: NextResponse<{ error: string }>;
 };
 
 /**
@@ -44,6 +44,6 @@ export async function getAuthenticatedUser(request: NextRequest): Promise<AuthRe
 /**
  * Check if the result is an error
  */
-export function isAuthError(result: AuthResult): result is { error: NextResponse } {
+export function isAuthError(result: AuthResult): result is { error: NextResponse<{ error: string }> } {
     return 'error' in result;
 }
