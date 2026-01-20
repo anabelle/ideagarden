@@ -25,6 +25,11 @@ model User {
   xp          Int      @default(0)
   level       Int      @default(1)
   
+  // Settings
+  remindersEnabled Boolean @default(true)
+  reminderTime     String  @default("09:00") // 24h format
+  timezone         String  @default("UTC")
+  
   // Relations
   seeds       Seed[]
   achievements UserAchievement[]
