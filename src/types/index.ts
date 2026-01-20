@@ -101,6 +101,7 @@ export interface GardenOverview {
         currentStreak: number;
         xp: number;
         level: number;
+        achievements: string[];
     };
 }
 

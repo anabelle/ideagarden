@@ -28,12 +28,15 @@ export class UnifiedGardenService {
     /**
      * Plant a new seed, but check for similarities first
      */
+    /**
+     * Plant a new seed, but check for similarities first
+     */
     async plant(
         userId: string,
         title: string,
         origin: string,
         author: Author = 'HUMAN'
-    ): Promise<{ seed?: Seed; similarSeeds: SimilarSeedResult[]; blocked: boolean }> {
+    ): Promise<{ seed?: Seed; similarSeeds: SimilarSeedResult[]; blocked: boolean; achievements?: string[] }> {
         // Check for high similarities (threshold 0.4 for auto-block/warning)
         const similarSeeds = await this.similarityService.findSimilarSeeds(userId, title, 0.25);
 
@@ -44,8 +47,8 @@ export class UnifiedGardenService {
             return { similarSeeds, blocked: true };
         }
 
-        const seed = await this.gardenService.plantSeed(userId, title, origin, author);
-        return { seed, similarSeeds, blocked: false };
+        const result = await this.gardenService.plantSeed(userId, title, origin, author);
+        return { seed: result.seed, similarSeeds, blocked: false, achievements: result.achievements };
     }
 
     /**

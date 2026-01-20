@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/ui/Navigation";
+import { ToastProvider } from "@/components/ui/ToastProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -35,10 +36,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${jetbrainsMono.variable}`}>
-        <Navigation />
-        <main className="min-h-screen pt-4 pb-20">
-          {children}
-        </main>
+        <ToastProvider>
+          <Navigation />
+          <main className="min-h-screen pt-4 pb-20">
+            {children}
+          </main>
+        </ToastProvider>
       </body>
     </html>
   );

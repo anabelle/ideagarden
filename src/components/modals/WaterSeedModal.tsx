@@ -7,6 +7,8 @@ import type { Seed } from '@/types';
 import { useSWRConfig } from 'swr';
 import { notifyGardenUpdate } from '@/lib/hooks/useGarden';
 
+import { useToast } from '@/components/ui/ToastProvider';
+
 interface WaterSeedModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -27,6 +29,7 @@ const WATERING_PROMPTS = [
 
 export function WaterSeedModal({ isOpen, onClose, seed, userId }: WaterSeedModalProps) {
     const { mutate } = useSWRConfig();
+    const { showAchievement } = useToast();
 
     // Form State
     const [content, setContent] = useState('');

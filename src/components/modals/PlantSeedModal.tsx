@@ -13,8 +13,11 @@ interface PlantSeedModalProps {
     userId: string; // Temporary integration until real auth context
 }
 
+import { useToast } from '@/components/ui/ToastProvider';
+
 export function PlantSeedModal({ isOpen, onClose, userId }: PlantSeedModalProps) {
     const { mutate } = useSWRConfig();
+    const { showAchievement } = useToast();
 
     // Form State
     const [title, setTitle] = useState('');
@@ -58,6 +61,11 @@ export function PlantSeedModal({ isOpen, onClose, userId }: PlantSeedModalProps)
             });
 
             const data = await res.json();
+
+            // Check achievements
+            if (data.achievements) {
+                data.achievements.forEach((a: string) => showAchievement(a));
+            }
 
             // Handle Similarity Block/Warning (409 Conflict)
             if (res.status === 409) {

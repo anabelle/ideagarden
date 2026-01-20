@@ -12,6 +12,7 @@ import {
     Author,
     GardenOverview
 } from '@/types';
+import { AchievementService } from './achievement-service';
 
 // Configuration for garden mechanics
 export const SPROUTING_THRESHOLD = 3;
@@ -24,6 +25,8 @@ export const XP_WATER = 5;
 export const XP_HARVEST = 50;
 
 export class GardenService {
+    private achievementService = new AchievementService();
+
     /**
      * Plant a new seed
      */
@@ -32,7 +35,7 @@ export class GardenService {
         title: string,
         origin: string,
         author: Author = 'HUMAN'
-    ): Promise<Seed> {
+    ): Promise<{ seed: Seed; achievements: string[] }> {
         const seed = await prisma.seed.create({
             data: {
                 userId,
@@ -48,7 +51,10 @@ export class GardenService {
         // Award XP for planting
         await this.awardXP(userId, XP_PLANT);
 
-        return seed as unknown as Seed;
+        // Check Achievements
+        const achievements = await this.achievementService.checkAchievements(userId);
+
+        return { seed: seed as unknown as Seed, achievements };
     }
 
     /**
@@ -77,6 +83,12 @@ export class GardenService {
         // Get user details for XP/Level
         const user = await prisma.user.findUnique({ where: { id: userId } });
 
+        // Get unlocked achievements
+        const unlockedAchievements = await prisma.userAchievement.findMany({
+            where: { userId },
+            include: { achievement: true }
+        });
+
         return {
             seeds: seeds as unknown as Seed[],
             sprouting: sprouting as unknown as Seed[],
@@ -89,6 +101,7 @@ export class GardenService {
                 currentStreak: streak?.currentStreak ?? 0,
                 xp: user?.xp ?? 0,
                 level: user?.level ?? 1,
+                achievements: unlockedAchievements.map(ua => ua.achievement.name),
             },
         };
     }
@@ -137,7 +150,7 @@ export class GardenService {
         seedId: string,
         content: string,
         author: Author = 'HUMAN'
-    ): Promise<{ seed: Seed; promoted: boolean; newSection?: SeedSection }> {
+    ): Promise<{ seed: Seed; promoted: boolean; newSection?: SeedSection; achievements: string[] }> {
         const seed = await prisma.seed.findUnique({
             where: { id: seedId },
         });
@@ -180,10 +193,14 @@ export class GardenService {
         // Award XP for watering
         await this.awardXP(userId, XP_WATER);
 
+        // Check Achievements
+        const achievements = await this.achievementService.checkAchievements(userId);
+
         return {
             seed: updatedSeed as unknown as Seed,
             promoted,
             newSection: promoted ? newSection as SeedSection : undefined,
+            achievements,
         };
     }
 
@@ -194,7 +211,7 @@ export class GardenService {
         userId: string,
         seedId: string,
         author: Author = 'HUMAN'
-    ): Promise<Seed> {
+    ): Promise<{ seed: Seed; achievements: string[] }> {
         const seed = await prisma.seed.findUnique({
             where: { id: seedId },
         });
@@ -229,7 +246,10 @@ export class GardenService {
         // Award major XP for harvesting
         await this.awardXP(userId, XP_HARVEST);
 
-        return harvestedSeed as unknown as Seed;
+        // Check Achievements
+        const achievements = await this.achievementService.checkAchievements(userId);
+
+        return { seed: harvestedSeed as unknown as Seed, achievements };
     }
 
     /**
@@ -240,7 +260,7 @@ export class GardenService {
         seedId: string,
         reason: string = 'No reason provided',
         author: Author = 'HUMAN'
-    ): Promise<Seed> {
+    ): Promise<{ seed: Seed; achievements: string[] }> {
         const seed = await prisma.seed.findUnique({
             where: { id: seedId },
         });
@@ -267,7 +287,10 @@ export class GardenService {
         // Enforce max compost items (Purge oldest)
         await this.purgeOldCompost(userId);
 
-        return compostedSeed as unknown as Seed;
+        // Check Achievements
+        const achievements = await this.achievementService.checkAchievements(userId);
+
+        return { seed: compostedSeed as unknown as Seed, achievements };
     }
 
     /**

@@ -14,6 +14,8 @@ import { HarvestCelebration } from '@/components/garden/HarvestCelebration';
 import { useSWRConfig } from 'swr';
 import { notifyGardenUpdate } from '@/lib/hooks/useGarden';
 import { ExperienceBar } from '@/components/gamification/ExperienceBar';
+import { BadgeList } from '@/components/gamification/BadgeList';
+import { useToast } from '@/components/ui/ToastProvider';
 import type { Seed } from '@/types';
 
 // Temporary test user ID until Auth UI is ready
@@ -22,6 +24,7 @@ const TEST_USER_ID = 'dev-user-123';
 function GardenContent() {
     const { garden, isLoading, isError } = useGarden(TEST_USER_ID);
     const { mutate } = useSWRConfig();
+    const { showAchievement } = useToast();
     const searchParams = useSearchParams();
 
     // Modal State
@@ -89,6 +92,11 @@ function GardenContent() {
             if (!res.ok) throw new Error('Failed to harvest');
 
             const data = await res.json();
+
+            // Check achievements
+            if (data.achievements) {
+                data.achievements.forEach((a: string) => showAchievement(a));
+            }
 
             // Close other modals
             setSelectedSeedIdForDetail(null);
@@ -196,6 +204,11 @@ function GardenContent() {
                 xp={garden.stats.xp}
                 level={garden.stats.level}
             />
+
+            {/* Badges */}
+            <div className="mb-8">
+                <BadgeList unlockedNames={garden.stats.achievements} />
+            </div>
 
             {/* Garden Stats Bar */}
             <div className="glass-card mb-12 grid grid-cols-2 gap-4 md:grid-cols-4">
