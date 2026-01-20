@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, X, Droplets, RefreshCw } from 'lucide-react';
 import type { Seed } from '@/types';
 import { useSWRConfig } from 'swr';
+import { notifyGardenUpdate } from '@/lib/hooks/useGarden';
 
 interface WaterSeedModalProps {
     isOpen: boolean;
@@ -73,8 +74,11 @@ export function WaterSeedModal({ isOpen, onClose, seed, userId }: WaterSeedModal
             // Success!
             setSuccess(true);
 
-            // Refresh garden data
+            // Refresh garden data locally
             mutate((key) => typeof key === 'string' && key.startsWith('/api/garden'));
+
+            // Notify other tabs
+            notifyGardenUpdate();
 
             // Close after animation
             setTimeout(() => {

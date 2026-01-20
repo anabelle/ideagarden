@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, X, AlertTriangle, ArrowRight, Sprout } from 'lucide-react';
 import type { SimilarSeedResult } from '@/types';
 import { useSWRConfig } from 'swr';
+import { notifyGardenUpdate } from '@/lib/hooks/useGarden';
 
 interface PlantSeedModalProps {
     isOpen: boolean;
@@ -73,8 +74,11 @@ export function PlantSeedModal({ isOpen, onClose, userId }: PlantSeedModalProps)
             // Success!
             setSuccess(true);
 
-            // Refresh garden data
+            // Refresh garden data locally
             mutate((key) => typeof key === 'string' && key.startsWith('/api/garden'));
+
+            // Notify other tabs
+            notifyGardenUpdate();
 
             // Close after simple animation delay
             setTimeout(() => {

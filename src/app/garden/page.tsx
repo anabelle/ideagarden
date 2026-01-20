@@ -10,6 +10,9 @@ import { SeedDetailModal } from '@/components/modals/SeedDetailModal';
 import { Loader2, Plus } from 'lucide-react';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import Link from 'next/link';
+import { HarvestCelebration } from '@/components/garden/HarvestCelebration';
+import { useSWRConfig } from 'swr';
+import { notifyGardenUpdate } from '@/lib/hooks/useGarden';
 import type { Seed } from '@/types';
 
 // Temporary test user ID until Auth UI is ready
@@ -17,12 +20,14 @@ const TEST_USER_ID = 'dev-user-123';
 
 function GardenContent() {
     const { garden, isLoading, isError } = useGarden(TEST_USER_ID);
+    const { mutate } = useSWRConfig();
     const searchParams = useSearchParams();
 
     // Modal State
     const [isPlantModalOpen, setIsPlantModalOpen] = useState(false);
     const [selectedSeedForWatering, setSelectedSeedForWatering] = useState<Seed | null>(null);
     const [selectedSeedIdForDetail, setSelectedSeedIdForDetail] = useState<string | null>(null);
+    const [harvestedSeed, setHarvestedSeed] = useState<Seed | null>(null);
 
     // Keyboard Shortcuts
     useKeyboardShortcuts({
@@ -34,6 +39,9 @@ function GardenContent() {
             setIsPlantModalOpen(false);
             setSelectedSeedForWatering(null);
             setSelectedSeedIdForDetail(null);
+            // Don't close harvest celebration on escape immediately to let them enjoy it? 
+            // Or yes, for consistency.
+            setHarvestedSeed(null);
         }
     });
 
@@ -69,7 +77,33 @@ function GardenContent() {
         if (seed) setSelectedSeedForWatering(seed);
     };
 
-    const handleHarvest = (id: string) => console.log('Harvest', id);
+    const handleHarvest = async (id: string) => {
+        try {
+            const res = await fetch('/api/garden/harvest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ seedId: id }),
+            });
+
+            if (!res.ok) throw new Error('Failed to harvest');
+
+            const data = await res.json();
+
+            // Close other modals
+            setSelectedSeedIdForDetail(null);
+
+            // Show celebration
+            setHarvestedSeed(data.seed);
+
+            // Refresh garden data
+            mutate(`/api/garden?userId=${TEST_USER_ID}`);
+            notifyGardenUpdate();
+        } catch (error) {
+            console.error('Harvest error:', error);
+            // Optionally show toast error
+        }
+    };
+
     const handleCompost = (id: string) => console.log('Compost', id);
     const handleSelect = (id: string) => {
         setSelectedSeedIdForDetail(id);
@@ -215,6 +249,11 @@ function GardenContent() {
                 onWater={handleWater}
                 onHarvest={handleHarvest}
                 onCompost={handleCompost}
+            />
+
+            <HarvestCelebration
+                seed={harvestedSeed}
+                onClose={() => setHarvestedSeed(null)}
             />
         </div>
     );
