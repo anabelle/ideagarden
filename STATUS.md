@@ -21,7 +21,7 @@
 | 6.7 | Implement /harvest and /compost commands | [x] | - | ✅ With checks |
 | 6.8 | Add similar seed warnings with inline buttons | [x] | - | ✅ Interactive |
 | 6.9 | Implement inline mode (@bot search) | [x] | - | ✅ Search added |
-| 6.10 | Set up daily reminder notifications | [ ] | - | - |
+| 6.10 | Set up daily reminder notifications | [x] | - | ✅ `/remind` + API trigger route |
 
 ---
 

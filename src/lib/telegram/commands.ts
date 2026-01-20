@@ -54,7 +54,9 @@ if (bot) {
             `/harvest <title> - Convert to task (needs 5+ waters)\n` +
             `/compost <title> - Archive a seed\n\n` +
             `*Settings:*\n` +
-            `/remind on|off - Toggle daily reminders`,
+            `/remind on|off - Toggle daily reminders\n` +
+            `/remind time HH:MM - Set reminder time\n` +
+            `/remind status - Show reminder settings`,
             { parse_mode: 'Markdown' }
         );
     });
@@ -268,19 +270,19 @@ if (bot) {
             const result = await garden.water(user.id, seed.id, content, 'HUMAN');
             ctx.session.pendingAction = undefined;
 
-            const progress = '●'.repeat(result.waterings) + '○'.repeat(Math.max(0, 5 - result.waterings));
-            let statusMsg = `${5 - result.waterings} more until harvest`;
+            const progress = '●'.repeat(result.seed.waterings) + '○'.repeat(Math.max(0, 5 - result.seed.waterings));
+            let statusMsg = `${5 - result.seed.waterings} more until harvest`;
 
-            if (result.waterings >= 5) {
+            if (result.seed.waterings >= 5) {
                 statusMsg = `🌸 Ready to harvest! Use /harvest ${pending.title}`;
             } else if (result.promoted) {
-                statusMsg = `📈 Promoted to ${result.section}!`;
+                statusMsg = `📈 Promoted to ${result.newSection}!`;
             }
 
             await ctx.reply(
                 `✅ *Watered!*\n\n` +
-                `🌱 ${result.title}\n` +
-                `${progress} (${result.waterings} waterings)\n\n` +
+                `🌱 ${result.seed.title}\n` +
+                `${progress} (${result.seed.waterings} waterings)\n\n` +
                 statusMsg,
                 { parse_mode: 'Markdown' }
             );
@@ -449,19 +451,20 @@ if (bot) {
                 const result = await garden.water(user.id, seed.id, content, 'HUMAN');
                 ctx.session.pendingAction = undefined;
 
-                const progress = '●'.repeat(result.waterings) + '○'.repeat(Math.max(0, 5 - result.waterings));
-                let statusMsg = `${5 - result.waterings} more until harvest`;
+                const progress = '●'.repeat(result.seed.waterings) + '○'.repeat(Math.max(0, 5 - result.seed.waterings));
+                let statusMsg = `${5 - result.seed.waterings} more until harvest`;
 
-                if (result.waterings >= 5) {
+                if (result.seed.waterings >= 5) {
                     statusMsg = `🌸 Ready to harvest! Use /harvest ${seed.title}`;
                 } else if (result.promoted) {
-                    statusMsg = `📈 Promoted to ${result.section}!`;
+                    statusMsg = `📈 Promoted to ${result.newSection}!`;
                 }
 
                 await ctx.editMessageText(
                     `✅ *Watered existing seed instead!*\n\n` +
-                    `🌱 ${result.title}\n` +
-                    `${progress} (${result.waterings} waterings)\n\n` +
+                    `🌱 ${result.seed.title}\n` +
+                    `${progress} (${result.seed.waterings} waterings)\n\n` +
+                    `${statusMsg}\n\n` +
                     `Tip: Next time, check your garden first!`,
                     { parse_mode: 'Markdown' }
                 );
@@ -508,6 +511,64 @@ if (bot) {
         }
     });
 
+    // REMINDERS COMMAND
+    bot.command('remind', async (ctx) => {
+        const arg = ctx.message.text.replace('/remind', '').trim();
+        const telegramId = ctx.from!.id.toString();
+        const userName = ctx.from!.first_name;
+
+        const user = await ensureUser(telegramId, userName);
+
+        const lower = arg.toLowerCase();
+
+        if (!arg || lower === 'status') {
+            const fresh = await prisma.user.findUnique({ where: { id: user.id } });
+            await ctx.reply(
+                `⏰ *Reminders*\n\n` +
+                `Enabled: *${fresh?.remindersEnabled ? 'on' : 'off'}*\n` +
+                `Time: *${fresh?.reminderTime ?? '09:00'}*\n` +
+                `Timezone: *${fresh?.timezone ?? 'UTC'}*\n\n` +
+                `Use /remind on or /remind off.`,
+                { parse_mode: 'Markdown' }
+            );
+            return;
+        }
+
+        if (lower === 'on' || lower === 'off') {
+            const remindersEnabled = lower === 'on';
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { remindersEnabled },
+            });
+
+            await ctx.reply(`✅ Daily reminders turned ${remindersEnabled ? 'on' : 'off'}.`);
+            return;
+        }
+
+        // /remind time HH:MM
+        if (lower.startsWith('time ')) {
+            const reminderTime = arg.slice('time '.length).trim();
+            if (!/^\d{2}:\d{2}$/.test(reminderTime)) {
+                await ctx.reply('Usage: /remind time HH:MM (24-hour)\nExample: /remind time 09:00');
+                return;
+            }
+
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { reminderTime },
+            });
+            await ctx.reply(`✅ Reminder time set to ${reminderTime}.`);
+            return;
+        }
+
+        await ctx.reply(
+            'Usage:\n' +
+            '/remind status\n' +
+            '/remind on|off\n' +
+            '/remind time HH:MM'
+        );
+    });
+
     // SEARCH COMMAND
     bot.command('search', async (ctx) => {
         const query = ctx.message.text.replace('/search', '').trim();
@@ -525,7 +586,7 @@ if (bot) {
 
             const results = allSeeds.filter(s =>
                 s.title.toLowerCase().includes(query.toLowerCase()) ||
-                (s.content && s.content.toLowerCase().includes(query.toLowerCase()))
+                (s.origin && s.origin.toLowerCase().includes(query.toLowerCase()))
             );
 
             if (results.length === 0) {

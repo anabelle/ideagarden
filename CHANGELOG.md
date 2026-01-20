@@ -7,6 +7,9 @@ All notable changes to the Idea Garden project.
 ## [Unreleased]
 
 ### Added
+- Telegram: daily reminder notifications (`/remind`, `POST /api/telegram/reminders`)
+
+### Added
 - Project initialization
 - Implementation plan (PLAN.md)
 - Status tracking (STATUS.md)
