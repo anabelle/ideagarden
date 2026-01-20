@@ -76,7 +76,7 @@ export function Navigation() {
                         </button>
 
                         <Link
-                            href="/garden/plant"
+                            href="/garden?action=plant"
                             className="btn btn--primary flex h-10 items-center gap-2 px-4 !rounded-full sm:px-6"
                         >
                             <Plus className="h-5 w-5" />

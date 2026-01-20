@@ -114,9 +114,12 @@ export class GardenService {
      * Update a seed
      */
     async updateSeed(seedId: string, data: Partial<Seed>): Promise<Seed> {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { logs, ...updateData } = data;
+
         const seed = await prisma.seed.update({
             where: { id: seedId },
-            data,
+            data: updateData as any,
         });
         return seed as unknown as Seed;
     }

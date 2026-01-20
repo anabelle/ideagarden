@@ -33,6 +33,7 @@ export interface Seed {
     plantedAt: Date;
     plantedBy: Author;
     updatedAt: Date;
+    logs?: WateringLog[];
 }
 
 /** A watering log entry - adding thoughts to a seed */
@@ -122,7 +123,8 @@ export interface WaterSeedResponse {
 }
 
 /** Similar seeds found during planting */
-export interface SimilarSeed {
+/** Similar seeds found during planting */
+export interface SimilarSeedResult {
     seed: Seed;
     similarity: number;
 }

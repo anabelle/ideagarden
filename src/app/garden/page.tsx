@@ -1,16 +1,65 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useGarden } from '@/lib/hooks/useGarden';
 import { GardenSection } from '@/components/garden/GardenSection';
+import { PlantSeedModal } from '@/components/modals/PlantSeedModal';
+import { WaterSeedModal } from '@/components/modals/WaterSeedModal';
+import { SeedDetailModal } from '@/components/modals/SeedDetailModal';
 import { Loader2, Plus } from 'lucide-react';
 import Link from 'next/link';
+import type { Seed } from '@/types';
 
 // Temporary test user ID until Auth UI is ready
 const TEST_USER_ID = 'dev-user-123';
 
-export default function GardenPage() {
+function GardenContent() {
     const { garden, isLoading, isError } = useGarden(TEST_USER_ID);
+    const searchParams = useSearchParams();
+
+    // Modal State
+    const [isPlantModalOpen, setIsPlantModalOpen] = useState(false);
+    const [selectedSeedForWatering, setSelectedSeedForWatering] = useState<Seed | null>(null);
+    const [selectedSeedIdForDetail, setSelectedSeedIdForDetail] = useState<string | null>(null);
+
+    // Check for query params to open modal (e.g. from Navigation)
+    useEffect(() => {
+        if (searchParams.get('action') === 'plant') {
+            setIsPlantModalOpen(true);
+        }
+    }, [searchParams]);
+
+    // Cleanup URL when closing modal
+    const closePlantModal = () => {
+        setIsPlantModalOpen(false);
+        // Remove query param without refresh
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+    };
+
+    // Find seed by ID helper
+    const findSeed = (id: string) => {
+        if (!garden) return null;
+        return [
+            ...garden.seeds,
+            ...garden.sprouting,
+            ...garden.readyToHarvest,
+            ...garden.composted
+        ].find(s => s.id === id) || null;
+    };
+
+    // Handlers
+    const handleWater = (id: string) => {
+        const seed = findSeed(id);
+        if (seed) setSelectedSeedForWatering(seed);
+    };
+
+    const handleHarvest = (id: string) => console.log('Harvest', id);
+    const handleCompost = (id: string) => console.log('Compost', id);
+    const handleSelect = (id: string) => {
+        setSelectedSeedIdForDetail(id);
+    };
 
     if (isLoading) {
         return (
@@ -71,12 +120,6 @@ export default function GardenPage() {
         },
     ];
 
-    // Handlers (placeholder for now, will be connected in Phase 4)
-    const handleWater = (id: string) => console.log('Water', id);
-    const handleHarvest = (id: string) => console.log('Harvest', id);
-    const handleCompost = (id: string) => console.log('Compost', id);
-    const handleSelect = (id: string) => console.log('Select', id);
-
     return (
         <div className="container mx-auto max-w-7xl px-4 py-8">
             {/* Header */}
@@ -90,13 +133,13 @@ export default function GardenPage() {
                     </p>
                 </div>
 
-                <Link
-                    href="/garden/plant"
+                <button
+                    onClick={() => setIsPlantModalOpen(true)}
                     className="btn btn--primary group"
                 >
                     <Plus className="h-5 w-5 transition-transform group-hover:rotate-90" />
                     Plant New Idea
-                </Link>
+                </button>
             </div>
 
             {/* Garden Stats Bar */}
@@ -134,6 +177,43 @@ export default function GardenPage() {
                     />
                 ))}
             </div>
+
+            {/* Modals */}
+            <PlantSeedModal
+                isOpen={isPlantModalOpen}
+                onClose={closePlantModal}
+                userId={TEST_USER_ID}
+            />
+
+            <WaterSeedModal
+                isOpen={!!selectedSeedForWatering}
+                onClose={() => setSelectedSeedForWatering(null)}
+                seed={selectedSeedForWatering}
+                userId={TEST_USER_ID}
+            />
+
+            <SeedDetailModal
+                isOpen={!!selectedSeedIdForDetail}
+                onClose={() => setSelectedSeedIdForDetail(null)}
+                seedId={selectedSeedIdForDetail}
+                initialSeed={selectedSeedIdForDetail ? findSeed(selectedSeedIdForDetail) : null}
+                userId={TEST_USER_ID}
+                onWater={handleWater}
+                onHarvest={handleHarvest}
+                onCompost={handleCompost}
+            />
         </div>
+    );
+}
+
+export default function GardenPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex min-h-[60vh] flex-col items-center justify-center">
+                <Loader2 className="h-12 w-12 animate-spin text-seed-green" />
+            </div>
+        }>
+            <GardenContent />
+        </Suspense>
     );
 }
