@@ -1,113 +1,27 @@
 # 🌱 Idea Garden - Current Status
 
-> Last updated: 2026-01-19T20:46:00-05:00
+> Last updated: 2026-01-19T22:58:00-05:00
 
 ---
 
-## Current Phase: Phase 0 - Project Foundation ✅
+## Current Phase: Phase 6 - Telegram Bot 🚧
 
-**Progress:** 6/6 tasks complete (100%)
+**Progress:** 4/10 tasks complete (40%)
 
 ### Tasks
 
 | # | Task | Status | Assigned | Notes |
 |---|------|--------|----------|-------|
-| 0.1 | Initialize Next.js project | [x] | - | ✅ Next.js 16.1.4 + React 19 |
-| 0.2 | Set up project structure | [x] | - | ✅ Docker + folder structure |
-| 0.3 | Create design system | [x] | - | ✅ Glassmorphism + dark mode |
-| 0.4 | Set up PostgreSQL + Prisma | [x] | - | ✅ Docker + Prisma 7 |
-| 0.5 | Create core data models | [x] | - | ✅ 9 models defined |
-| 0.6 | Initialize Git repository | [x] | - | ✅ All progress committed |
-
----
-
-## Current Phase: Phase 1 - Core Engine ✅
-
-**Progress:** 8/8 tasks complete (100%)
-
-### Tasks
-
-| # | Task | Status | Assigned | Notes |
-|---|------|--------|----------|-------|
-| 1.1 | Seed CRUD operations | [x] | - | ✅ GardenService implemented |
-| 1.2 | Watering + Auto-Promotion | [x] | - | ✅ Seeds grow based on thoughts |
-| 1.3 | Harvesting logic | [x] | - | ✅ 5+ waterings required |
-| 1.4 | Composting logic | [x] | - | ✅ Auto-purge (>5 items) |
-| 1.5 | Semantic Similarity Engine | [x] | - | ✅ Jaccard + Keyword extraction |
-| 1.6 | Merge/Consolidate Logic | [x] | - | ✅ Multi-seed synthesis |
-| 1.7 | Unified Garden Service | [x] | - | ✅ Orchestrator entry point |
-| 1.8 | Unit Tests | [x] | - | ✅ 11 tests passing |
-
----
-
-## Current Phase: Phase 2 - REST API ✅
-
-**Progress:** 9/9 tasks complete (100%)
-
-### Tasks
-
-| # | Task | Status | Assigned | Notes |
-|---|------|--------|----------|-------|
-| 2.1 | GET /api/garden | [x] | - | ✅ Returns garden state with stats |
-| 2.2 | POST /api/garden/plant | [x] | - | ✅ Plants seed with similarity check |
-| 2.3 | POST /api/garden/water | [x] | - | ✅ Adds thoughts to seeds |
-| 2.4 | POST /api/garden/harvest | [x] | - | ✅ Harvests mature seeds |
-| 2.5 | POST /api/garden/compost | [x] | - | ✅ Discards seeds |
-| 2.6 | POST /api/garden/merge | [x] | - | ✅ Merges similar seeds |
-| 2.7 | GET /api/garden/consolidate | [x] | - | ✅ AI merge suggestions |
-| 2.8 | Authentication middleware | [x] | - | ✅ NextAuth v5 + header fallback |
-| 2.9 | API integration tests | [x] | - | ✅ 18 integration tests passing |
-
----
-
-## Overall Progress
-
-```
-Phase 0: Foundation     [██████████] 100% ✅
-Phase 1: Core Engine    [██████████] 100% ✅
-Phase 2: REST API       [██████████] 100% ✅
-Phase 3: UI Foundation  [░░░░░░░░░░] 0%
-Phase 4: UI Interactions[░░░░░░░░░░] 0%
-Phase 5: Gamification   [░░░░░░░░░░] 0%
-Phase 6: Telegram Bot   [░░░░░░░░░░] 0%
-Phase 7: Mini App       [░░░░░░░░░░] 0%
-Phase 8: Onboarding     [░░░░░░░░░░] 0%
-Phase 9: Advanced       [░░░░░░░░░░] 0%
-Phase 10: Launch        [░░░░░░░░░░] 0%
-```
-
----
-
-## Current Phase: Phase 4 - UI Interactions 🚧
-
-**Progress:** 2/7 tasks complete (28%)
-
-### Tasks
-
-| # | Task | Status | Assigned | Notes |
-|---|------|--------|----------|-------|
-| 4.1 | PlantSeedModal | [x] | - | ✅ Similarity check + Animations |
-| 4.2 | WaterSeedModal | [x] | - | ✅ Rotating prompts + Success state |
-| 4.3 | SeedDetailView | [x] | - | ✅ Full timeline + Actions |
-| 4.4 | Micro-Animations | [x] | - | ✅ Pulse, Drops, Sprouts |
-| 4.5 | Keyboard Shortcuts | [x] | - | ✅ N for New, Esc for Close |
-| 4.6 | HarvestCelebration | [x] | - | ✅ Confetti + Stats |
-| 4.7 | Real-Time Updates | [x] | - | ✅ BroadcastChannel + SWR |
-
----
-
-## Current Phase: Phase 5 - Gamification 🚧
-
-**Progress:** 2/4 tasks complete (50%)
-
-### Tasks
-
-| # | Task | Status | Assigned | Notes |
-|---|------|--------|----------|-------|
-| 5.1 | XP Schema & Logic | [x] | - | ✅ Integrated into Service |
-| 5.2 | XP UI (ExperienceBar) | [x] | - | ✅ Visual Progress Bar |
-| 5.3 | Badges & Achievements | [x] | - | ✅ Toast System & List |
-| 5.4 | Leaderboard/Stats | [x] | - | ✅ StatsPanel Component |
+| 6.1 | Register bot with @BotFather | [x] | - | ✅ User must do this |
+| 6.2 | Set up Telegraf.js bot server | [x] | - | ✅ Initialized & Commands |
+| 6.3 | Implement /start and /help commands | [x] | - | ✅ Implemented |
+| 6.4 | Implement /garden command | [x] | - | ✅ Implemented |
+| 6.5 | Implement /plant command with conversation | [~] | - | 🚧 Basic support added |
+| 6.6 | Implement /water command with conversation | [ ] | - | - |
+| 6.7 | Implement /harvest and /compost commands | [ ] | - | - |
+| 6.8 | Add similar seed warnings with inline buttons | [ ] | - | - |
+| 6.9 | Implement inline mode (@bot search) | [ ] | - | - |
+| 6.10 | Set up daily reminder notifications | [ ] | - | - |
 
 ---
 
@@ -120,7 +34,7 @@ Phase 2: REST API       [██████████] 100% ✅
 Phase 3: UI Foundation  [██████████] 100% ✅
 Phase 4: UI Interactions[██████████] 100% ✅
 Phase 5: Gamification   [██████████] 100% ✅
-Phase 6: Telegram Bot   [░░░░░░░░░░] 0%
+Phase 6: Telegram Bot   [████░░░░░░] 40%
 Phase 7: Mini App       [░░░░░░░░░░] 0%
 Phase 8: Onboarding     [░░░░░░░░░░] 0%
 Phase 9: Advanced       [░░░░░░░░░░] 0%
@@ -131,7 +45,7 @@ Phase 10: Launch        [░░░░░░░░░░] 0%
 
 ## Next Action
 
-**Phase 6 - Task 6.1:** Register Telegram Bot
+**Phase 6 - Task 6.5:** Full conversation flow for /plant and /water
 
 Run workflow: `.agent/workflows/telegram.md`
 
@@ -146,24 +60,15 @@ Run workflow: `.agent/workflows/telegram.md`
 | 2026-01-19 | Session 3 | 0.2, 0.4, 0.5 | Docker + Prisma + structure |
 | 2026-01-19 | Session 4 | 1.1-1.8 | Core engine + tests complete |
 | 2026-01-19 | Session 5 | 2.1 | First API endpoint (GET /api/garden) |
+| 2026-01-19 | Session 6 | 4.1-4.7 | Modals, Animations, Real-time |
+| 2026-01-19 | Session 7 | 5.1-5.4 | Gamification (XP, Badges, Stats) |
+| 2026-01-19 | Session 7 | 6.1-6.4 | Telegram Bot Setup |
 
 ---
 
 ## Quick Stats
 
 - **Started:** 2026-01-19
-- **Current Phase:** 2 (REST API)
-- **Tasks Completed:** 15
-- **Tasks Remaining:** 52
-- **Estimated Time Left:** ~35.5 hours
-- **Blockers:** None
-
----
-
-## Status Legend
-
-- `[ ]` = Not started
-- `[~]` = In progress
-- `[x]` = Complete
-- `[!]` = Blocked (see BLOCKERS.md)
-
+- **Current Phase:** 6 (Telegram Bot)
+- **Tasks Completed:** ~55%
+- **Blockers:** Need TELEGRAM_BOT_TOKEN
