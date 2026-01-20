@@ -8,6 +8,7 @@ import { PlantSeedModal } from '@/components/modals/PlantSeedModal';
 import { WaterSeedModal } from '@/components/modals/WaterSeedModal';
 import { SeedDetailModal } from '@/components/modals/SeedDetailModal';
 import { Loader2, Plus } from 'lucide-react';
+import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import Link from 'next/link';
 import type { Seed } from '@/types';
 
@@ -22,6 +23,19 @@ function GardenContent() {
     const [isPlantModalOpen, setIsPlantModalOpen] = useState(false);
     const [selectedSeedForWatering, setSelectedSeedForWatering] = useState<Seed | null>(null);
     const [selectedSeedIdForDetail, setSelectedSeedIdForDetail] = useState<string | null>(null);
+
+    // Keyboard Shortcuts
+    useKeyboardShortcuts({
+        'n': (e) => {
+            e.preventDefault();
+            setIsPlantModalOpen(true);
+        },
+        'Escape': () => {
+            setIsPlantModalOpen(false);
+            setSelectedSeedForWatering(null);
+            setSelectedSeedIdForDetail(null);
+        }
+    });
 
     // Check for query params to open modal (e.g. from Navigation)
     useEffect(() => {
