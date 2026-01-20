@@ -19,8 +19,8 @@
 | 6.5 | Implement /plant command with conversation | [x] | - | ✅ State machine |
 | 6.6 | Implement /water command with conversation | [x] | - | ✅ Interactive prompts |
 | 6.7 | Implement /harvest and /compost commands | [x] | - | ✅ With checks |
-| 6.8 | Add similar seed warnings with inline buttons | [ ] | - | - |
-| 6.9 | Implement inline mode (@bot search) | [ ] | - | - |
+| 6.8 | Add similar seed warnings with inline buttons | [x] | - | ✅ Interactive |
+| 6.9 | Implement inline mode (@bot search) | [x] | - | ✅ Search added |
 | 6.10 | Set up daily reminder notifications | [ ] | - | - |
 
 ---
@@ -34,7 +34,7 @@ Phase 2: REST API       [██████████] 100% ✅
 Phase 3: UI Foundation  [██████████] 100% ✅
 Phase 4: UI Interactions[██████████] 100% ✅
 Phase 5: Gamification   [██████████] 100% ✅
-Phase 6: Telegram Bot   [███████░░░] 70%
+Phase 6: Telegram Bot   [█████████░] 90%
 Phase 7: Mini App       [░░░░░░░░░░] 0%
 Phase 8: Onboarding     [░░░░░░░░░░] 0%
 Phase 9: Advanced       [░░░░░░░░░░] 0%
@@ -45,7 +45,7 @@ Phase 10: Launch        [░░░░░░░░░░] 0%
 
 ## Next Action
 
-**Phase 6 - Task 6.8:** Add similar seed warnings with inline buttons
+**Phase 6 - Task 6.10:** Set up daily reminder notifications
 
 Run workflow: `.agent/workflows/telegram.md`
 

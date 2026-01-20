@@ -35,7 +35,8 @@ export class UnifiedGardenService {
         userId: string,
         title: string,
         origin: string,
-        author: Author = 'HUMAN'
+        author: Author = 'HUMAN',
+        force: boolean = false
     ): Promise<{ seed?: Seed; similarSeeds: SimilarSeedResult[]; blocked: boolean; achievements?: string[] }> {
         // Check for high similarities (threshold 0.4 for auto-block/warning)
         const similarSeeds = await this.similarityService.findSimilarSeeds(userId, title, 0.25);
@@ -43,7 +44,7 @@ export class UnifiedGardenService {
         // If a very similar seed exists (> 0.6 similarity), we consider it a duplicate and block
         const isDuplicate = similarSeeds.some(s => s.similarity > 0.6);
 
-        if (isDuplicate) {
+        if (isDuplicate && !force) {
             return { similarSeeds, blocked: true };
         }
 

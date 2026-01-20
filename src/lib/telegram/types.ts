@@ -3,6 +3,7 @@ export interface SessionData {
         type: 'plant' | 'water';
         title?: string;
     };
+    duplicateOrigin?: string;
 }
 
 export interface BotContext {

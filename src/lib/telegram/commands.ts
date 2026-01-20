@@ -219,12 +219,27 @@ if (bot) {
             ctx.session.pendingAction = undefined;
 
             if (blocked) {
-                // For now, just notify
-                // TODO: Better duplicate handling
+                const similarSeed = similarSeeds[0].seed;
                 await ctx.reply(
-                    `⚠️ Similar seed found: "${similarSeeds[0].seed.title}".\n` +
-                    `This idea was blocked to prevent duplicates. You can water the existing seed instead.`
+                    `⚠️ *Similar seed found:*\n` +
+                    `"${similarSeed.title}"\n\n` +
+                    `It looks like you already have this idea. What would you like to do?`,
+                    {
+                        parse_mode: 'Markdown',
+                        reply_markup: {
+                            inline_keyboard: [
+                                [{ text: `💧 Water "${similarSeed.title}" instead`, callback_data: `water_dup:${similarSeed.id}` }],
+                                [{ text: `🌱 Plant "${pending.title}" anyway`, callback_data: `plant_force:${pending.title}` }] // Limitation: origin is lost in callback unless we store in session or encoded in data (length limit). 
+                                // Better: store origin in session and just use "plant_force" 
+                            ]
+                        }
+                    }
                 );
+                // We need to keep pendingAction or store origin somewhere?
+                // ctx.session is persisted. We can keep "pendingAction" as is?
+                // Or update it to 'resolve_duplicate'.
+                // Actually, if we use callback, we can read session there.
+                ctx.session.duplicateOrigin = origin;
             } else {
                 await ctx.reply(
                     `✅ *Seed planted!*\n\n` +
@@ -395,6 +410,176 @@ if (bot) {
         } catch (e) {
             console.error(e);
             ctx.answerCbQuery('Failed to compost');
+        }
+
+    });
+
+    // DUPLICATE RESOLUTION - WATER INSTEAD
+    bot.action(/water_dup:(.+)/, async (ctx) => {
+        const seedId = ctx.match[1];
+        const telegramId = ctx.from!.id.toString();
+        const userName = ctx.from!.first_name;
+
+        try {
+            const user = await ensureUser(telegramId, userName);
+            // We need to switch to watering flow.
+            // Get seed details first
+            const gardenData = await garden.getGarden(user.id);
+            // Seed might be in any list
+            const allSeeds = [...gardenData.seeds, ...gardenData.sprouting, ...gardenData.readyToHarvest];
+            const seed = allSeeds.find(s => s.id === seedId);
+
+            if (!seed) {
+                return ctx.reply('❌ Error: Seed not found.');
+            }
+
+            // Start watering flow
+            ctx.session.pendingAction = { type: 'water', title: seed.title };
+
+            // Use origin as thought if available? No, usually origin is context for planting. Thought for watering is different.
+            // But user might have typed a thought as "origin".
+
+            if (ctx.session.duplicateOrigin) {
+                // Auto-water with the origin text?
+                // Let's ask user: "Use your previous text as thought?" or just use it.
+                // Simpler to just use it.
+                const content = ctx.session.duplicateOrigin;
+                ctx.session.duplicateOrigin = undefined;
+
+                const result = await garden.water(user.id, seed.id, content, 'HUMAN');
+                ctx.session.pendingAction = undefined;
+
+                const progress = '●'.repeat(result.waterings) + '○'.repeat(Math.max(0, 5 - result.waterings));
+                let statusMsg = `${5 - result.waterings} more until harvest`;
+
+                if (result.waterings >= 5) {
+                    statusMsg = `🌸 Ready to harvest! Use /harvest ${seed.title}`;
+                } else if (result.promoted) {
+                    statusMsg = `📈 Promoted to ${result.section}!`;
+                }
+
+                await ctx.editMessageText(
+                    `✅ *Watered existing seed instead!*\n\n` +
+                    `🌱 ${result.title}\n` +
+                    `${progress} (${result.waterings} waterings)\n\n` +
+                    `Tip: Next time, check your garden first!`,
+                    { parse_mode: 'Markdown' }
+                );
+                return;
+            }
+
+            const progress = '●'.repeat(seed.waterings) + '○'.repeat(Math.max(0, 5 - seed.waterings));
+            await ctx.reply(
+                `💧 Watering "${seed.title}"\n\n` +
+                `Current: ${progress} (${seed.waterings} waterings)\n\n` +
+                `What's your new thought for this seed?`
+            );
+
+        } catch (e) {
+            console.error(e);
+            ctx.reply('Error processing request.');
+        }
+    });
+
+    // DUPLICATE RESOLUTION - PLANT ANYWAY
+    bot.action(/plant_force:(.+)/, async (ctx) => {
+        const title = ctx.match[1];
+        const telegramId = ctx.from!.id.toString();
+
+        try {
+            const user = await ensureUser(telegramId);
+            const origin = ctx.session.duplicateOrigin || "Forced plant via Telegram";
+            ctx.session.duplicateOrigin = undefined;
+
+            // Force plant
+            const { seed } = await garden.plant(user.id, title, origin, 'HUMAN', true);
+
+            await ctx.editMessageText(
+                `✅ *Seed planted (forced)!*\n\n` +
+                `🌱 ${seed?.title}\n` +
+                `○○○○○ (0 waterings)\n\n` +
+                `Water it with /water ${seed?.title}`,
+                { parse_mode: 'Markdown' }
+            );
+
+        } catch (e) {
+            console.error(e);
+            ctx.reply('Failed to plant.');
+        }
+    });
+
+    // SEARCH COMMAND
+    bot.command('search', async (ctx) => {
+        const query = ctx.message.text.replace('/search', '').trim();
+        const telegramId = ctx.from!.id.toString();
+        const userName = ctx.from!.first_name;
+
+        if (!query) {
+            return ctx.reply('Usage: /search <query>\n\nExample: /search reacting');
+        }
+
+        try {
+            const user = await ensureUser(telegramId, userName);
+            const gardenData = await garden.getGarden(user.id);
+            const allSeeds = [...gardenData.seeds, ...gardenData.sprouting, ...gardenData.readyToHarvest];
+
+            const results = allSeeds.filter(s =>
+                s.title.toLowerCase().includes(query.toLowerCase()) ||
+                (s.content && s.content.toLowerCase().includes(query.toLowerCase()))
+            );
+
+            if (results.length === 0) {
+                return ctx.reply(`🔍 No seeds found for "${query}".`);
+            }
+
+            let msg = `🔍 *Search Results for "${query}":*\n\n`;
+            results.slice(0, 10).forEach(s => {
+                const icon = s.waterings >= 5 ? '🌸' : (s.waterings > 0 ? '🌿' : '🌱');
+                msg += `${icon} *${s.title}* (${s.waterings}/5)\n`;
+            });
+
+            await ctx.reply(msg, { parse_mode: 'Markdown' });
+
+        } catch (e) {
+            console.error(e);
+            ctx.reply('Search failed.');
+        }
+    });
+
+    // INLINE QUERY
+    bot.on('inline_query', async (ctx) => {
+        const query = ctx.inlineQuery.query.trim().toLowerCase();
+        const telegramId = ctx.from.id.toString();
+
+        try {
+            // We can't use ensureUser easily here effectively if we want speed, 
+            // but we need userId.
+            const user = await ensureUser(telegramId, ctx.from.first_name);
+            const gardenData = await garden.getGarden(user.id);
+            const allSeeds = [...gardenData.seeds, ...gardenData.sprouting, ...gardenData.readyToHarvest];
+
+            const results = allSeeds
+                .filter(s => !query || s.title.toLowerCase().includes(query))
+                .slice(0, 50)
+                .map(s => {
+                    const icon = s.waterings >= 5 ? '🌸' : (s.waterings > 0 ? '🌿' : '🌱');
+                    const progress = '●'.repeat(s.waterings) + '○'.repeat(Math.max(0, 5 - s.waterings));
+                    return {
+                        type: 'article',
+                        id: s.id,
+                        title: `${icon} ${s.title}`,
+                        description: `Stats: ${progress} (${s.waterings}/5 waterings)`,
+                        input_message_content: {
+                            message_text: `🌱 *${s.title}*\nStatus: ${progress}\n\nWater this seed with /water ${s.title}`,
+                            parse_mode: 'Markdown'
+                        }
+                    };
+                });
+
+            await ctx.answerInlineQuery(results as any, { cache_time: 0 });
+
+        } catch (e) {
+            console.error(e);
         }
     });
 }
