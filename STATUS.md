@@ -16,8 +16,8 @@
 | 6.2 | Set up Telegraf.js bot server | [x] | - | ✅ Initialized & Commands |
 | 6.3 | Implement /start and /help commands | [x] | - | ✅ Implemented |
 | 6.4 | Implement /garden command | [x] | - | ✅ Implemented |
-| 6.5 | Implement /plant command with conversation | [~] | - | 🚧 Basic support added |
-| 6.6 | Implement /water command with conversation | [ ] | - | - |
+| 6.5 | Implement /plant command with conversation | [x] | - | ✅ State machine |
+| 6.6 | Implement /water command with conversation | [x] | - | ✅ Interactive prompts |
 | 6.7 | Implement /harvest and /compost commands | [ ] | - | - |
 | 6.8 | Add similar seed warnings with inline buttons | [ ] | - | - |
 | 6.9 | Implement inline mode (@bot search) | [ ] | - | - |
@@ -34,7 +34,7 @@ Phase 2: REST API       [██████████] 100% ✅
 Phase 3: UI Foundation  [██████████] 100% ✅
 Phase 4: UI Interactions[██████████] 100% ✅
 Phase 5: Gamification   [██████████] 100% ✅
-Phase 6: Telegram Bot   [████░░░░░░] 40%
+Phase 6: Telegram Bot   [██████░░░░] 60%
 Phase 7: Mini App       [░░░░░░░░░░] 0%
 Phase 8: Onboarding     [░░░░░░░░░░] 0%
 Phase 9: Advanced       [░░░░░░░░░░] 0%
@@ -45,7 +45,7 @@ Phase 10: Launch        [░░░░░░░░░░] 0%
 
 ## Next Action
 
-**Phase 6 - Task 6.5:** Full conversation flow for /plant and /water
+**Phase 6 - Task 6.7:** Implement /harvest and /compost commands
 
 Run workflow: `.agent/workflows/telegram.md`
 

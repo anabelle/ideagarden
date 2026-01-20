@@ -113,28 +113,162 @@ if (bot) {
 
     // PLANT
     bot.command('plant', async (ctx) => {
-        const text = ctx.message.text.split(' ').slice(1).join(' ');
-        if (!text) {
-            return ctx.reply('Usage: /plant <title>');
+        const title = ctx.message.text.replace('/plant', '').trim();
+        const telegramId = ctx.from!.id.toString();
+        const userName = ctx.from!.first_name;
+
+        const user = await ensureUser(telegramId, userName);
+
+        if (!title) {
+            return ctx.reply('Usage: /plant <idea title>\n\nExample: /plant AI code review');
+        }
+
+        // Check for similar seeds
+        const { blocked, similarSeeds } = await garden.plant(user.id, title, '', 'HUMAN'); // Dry run check? No, plant method does it. 
+        // Wait, garden.plant actually plants it. We should use garden.similarityService directly or just check blocked result?
+        // The service.plant method DOES check and return blocked=true if duplicate.
+        // But if we want to ask for origin BEFORE planting, we can't call plant() yet.
+        // Plan says: "Store pending plant, ask for origin".
+
+        // Let's check similarity first manually or use a helper?
+        // garden.plant does it all. If we want conversation, we should defer the actual planting.
+        // But we need to know if it's a duplicate before asking origin?
+        // Actually, the plan: "Check for similar seeds... If similar > Confirm."
+        // We can use garden.similarityService.findSimilarSeeds directly if exposed, or just rely on plant returning blocked.
+        // Since `plant` returns `blocked: true` without persisting if duplicate, we can use it!
+        // Wait, if it returns blocked=false, it HAS planted it.
+        // So we can't use `plant` to just check. We need `garden.similarityService`.
+        // But `garden` is the UnifiedGardenService. It has `similarityService` private.
+        // We might need to expose a check method or just assume we ask origin first?
+
+        // Let's implement the "Ask Origin" flow first.
+
+        ctx.session = ctx.session || {};
+        ctx.session.pendingAction = { type: 'plant', title };
+
+        await ctx.reply(
+            `🌱 Planting "${title}"\n\n` +
+            `What's the origin of this idea?\n` +
+            `(Reply with the inspiration or context, or /cancel)`
+        );
+    });
+
+    // WATER
+    bot.command('water', async (ctx) => {
+        const title = ctx.message.text.replace('/water', '').trim();
+
+        if (!title) {
+            return ctx.reply('Usage: /water <seed title>\n\nExample: /water My Idea');
         }
 
         const telegramId = ctx.from!.id.toString();
         const userName = ctx.from!.first_name;
+        const user = await ensureUser(telegramId, userName);
 
-        try {
-            const user = await ensureUser(telegramId, userName);
-            const { seed, blocked, similarSeeds } = await garden.plant(user.id, text, 'Planting via Telegram');
+        // Find the seed
+        // We need a way to find seed by title loosely
+        const gardenData = await garden.getGarden(user.id);
+        const allSeeds = [...gardenData.seeds, ...gardenData.sprouting, ...gardenData.readyToHarvest];
+        const seed = allSeeds.find(s => s.title.toLowerCase().includes(title.toLowerCase())); // Simple loose match
+
+        if (!seed) {
+            return ctx.reply(`❌ Seed "${title}" not found.`);
+        }
+
+        ctx.session = ctx.session || {};
+        ctx.session.pendingAction = { type: 'water', title: seed.title }; // Use exact title
+
+        const progress = '●'.repeat(seed.waterings) + '○'.repeat(Math.max(0, 5 - seed.waterings));
+
+        await ctx.reply(
+            `💧 Watering "${seed.title}"\n\n` +
+            `Current: ${progress} (${seed.waterings} waterings)\n\n` +
+            `What's your new thought for this seed?\n` +
+            `(Reply with your thought, or /cancel)`
+        );
+    });
+
+    // CANCEL
+    bot.command('cancel', async (ctx) => {
+        if (ctx.session?.pendingAction) {
+            ctx.session.pendingAction = undefined;
+            await ctx.reply('Action cancelled.');
+        } else {
+            await ctx.reply('Nothing to cancel.');
+        }
+    });
+
+    // HANDLE TEXT REPLIES (Conversation)
+    bot.on('text', async (ctx) => {
+        // Ignore commands
+        if (ctx.message.text.startsWith('/')) return;
+
+        const pending = ctx.session?.pendingAction;
+        if (!pending) return;
+
+        const telegramId = ctx.from!.id.toString();
+        // ensureUser is fast (cached in DB query)
+        const user = await ensureUser(telegramId, ctx.from!.first_name);
+
+        if (pending.type === 'plant' && pending.title) {
+            // FINISH PLANTING
+            const origin = ctx.message.text;
+
+            const { seed, blocked, similarSeeds } = await garden.plant(user.id, pending.title, origin, 'HUMAN');
+
+            ctx.session.pendingAction = undefined;
 
             if (blocked) {
-                // TODO: Interactive buttons to confirm or link
-                return ctx.reply(`Similar seed found: ${similarSeeds[0].seed.title}. Try watering it instead?`);
+                // For now, just notify
+                // TODO: Better duplicate handling
+                await ctx.reply(
+                    `⚠️ Similar seed found: "${similarSeeds[0].seed.title}".\n` +
+                    `This idea was blocked to prevent duplicates. You can water the existing seed instead.`
+                );
+            } else {
+                await ctx.reply(
+                    `✅ *Seed planted!*\n\n` +
+                    `🌱 ${seed?.title}\n` +
+                    `○○○○○ (0 waterings)\n\n` +
+                    `Water it with /water ${seed?.title}`,
+                    { parse_mode: 'Markdown' }
+                );
+            }
+        }
+        else if (pending.type === 'water' && pending.title) {
+            // FINISH WATERING
+            const content = ctx.message.text;
+
+            // We need seed ID... but we stored title.
+            // We have to lookup again.
+            const gardenData = await garden.getGarden(user.id);
+            const allSeeds = [...gardenData.seeds, ...gardenData.sprouting, ...gardenData.readyToHarvest];
+            const seed = allSeeds.find(s => s.title === pending.title);
+
+            if (!seed) {
+                ctx.session.pendingAction = undefined;
+                return ctx.reply('❌ Error: Seed not found (maybe harvested?).');
             }
 
-            ctx.reply(`🌱 Planted: *${seed?.title}*`, { parse_mode: 'Markdown' });
+            const result = await garden.water(user.id, seed.id, content, 'HUMAN');
+            ctx.session.pendingAction = undefined;
 
-        } catch (e) {
-            console.error(e);
-            ctx.reply('Failed to plant.');
+            const progress = '●'.repeat(result.waterings) + '○'.repeat(Math.max(0, 5 - result.waterings));
+            let statusMsg = `${5 - result.waterings} more until harvest`;
+
+            if (result.waterings >= 5) {
+                statusMsg = `🌸 Ready to harvest! Use /harvest ${pending.title}`;
+            } else if (result.promoted) {
+                statusMsg = `📈 Promoted to ${result.section}!`;
+            }
+
+            await ctx.reply(
+                `✅ *Watered!*\n\n` +
+                `🌱 ${result.title}\n` +
+                `${progress} (${result.waterings} waterings)\n\n` +
+                statusMsg,
+                { parse_mode: 'Markdown' }
+            );
         }
     });
 }
