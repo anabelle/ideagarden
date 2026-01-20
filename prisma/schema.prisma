@@ -1,0 +1,176 @@
+// 🌱 Idea Garden - Database Schema
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ===========================================
+// CORE MODELS
+// ===========================================
+
+/// User profile - can sign in via email or Telegram
+model User {
+  id          String   @id @default(cuid())
+  email       String?  @unique
+  telegramId  String?  @unique
+  name        String?
+  avatarUrl   String?
+  
+  // Gamification
+  xp          Int      @default(0)
+  level       Int      @default(1)
+  
+  // Relations
+  seeds       Seed[]
+  achievements UserAchievement[]
+  streak      Streak?
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([email])
+  @@index([telegramId])
+}
+
+/// A seed represents an idea in the garden
+model Seed {
+  id          String      @id @default(cuid())
+  title       String
+  origin      String      @db.Text  // Original thought when planted
+  
+  // Garden state
+  waterings   Int         @default(0)
+  status      SeedStatus  @default(ACTIVE)
+  section     SeedSection @default(SEEDS)
+  
+  // Authorship
+  plantedBy   Author      @default(HUMAN)
+  
+  // Relations
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs        WateringLog[]
+  tags        SeedTag[]
+  
+  // Merge tracking
+  mergedIntoId String?
+  mergedInto   Seed?      @relation("SeedMerge", fields: [mergedIntoId], references: [id])
+  mergedFrom   Seed[]     @relation("SeedMerge")
+  
+  // Timestamps
+  plantedAt   DateTime    @default(now())
+  harvestedAt DateTime?
+  updatedAt   DateTime    @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([section])
+}
+
+/// Log entry for each time a seed is watered
+model WateringLog {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  author    Author   @default(HUMAN)
+  
+  // Relations
+  seedId    String
+  seed      Seed     @relation(fields: [seedId], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  @@index([seedId])
+}
+
+/// Tags for organizing seeds
+model Tag {
+  id    String    @id @default(cuid())
+  name  String    @unique
+  color String    @default("#4ade80")
+  seeds SeedTag[]
+}
+
+/// Many-to-many relation between seeds and tags
+model SeedTag {
+  seedId String
+  tagId  String
+  seed   Seed   @relation(fields: [seedId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@id([seedId, tagId])
+}
+
+// ===========================================
+// GAMIFICATION
+// ===========================================
+
+/// Available achievements/badges
+model Achievement {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  icon        String   // Emoji or icon name
+  xpReward    Int      @default(0)
+  
+  // Unlock condition (stored as JSON for flexibility)
+  condition   Json
+  
+  // Relations
+  users       UserAchievement[]
+}
+
+/// User's unlocked achievements
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  achievementId String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  
+  unlockedAt    DateTime    @default(now())
+  
+  @@unique([userId, achievementId])
+  @@index([userId])
+}
+
+/// Daily activity streak tracking
+model Streak {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  currentStreak     Int      @default(0)
+  longestStreak     Int      @default(0)
+  lastActivityDate  DateTime @default(now())
+  
+  updatedAt         DateTime @updatedAt
+}
+
+// ===========================================
+// ENUMS
+// ===========================================
+
+enum SeedStatus {
+  ACTIVE
+  HARVESTED
+  COMPOSTED
+}
+
+enum SeedSection {
+  SEEDS
+  SPROUTING
+  READY_TO_HARVEST
+  COMPOST
+}
+
+enum Author {
+  HUMAN
+  AI
+}

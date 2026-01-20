@@ -1,0 +1,80 @@
+/* SeedCard Component Styles */
+
+.card {
+    cursor: pointer;
+    transition:
+        transform var(--transition-normal),
+        box-shadow var(--transition-normal);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+.card:focus {
+    outline: 2px solid var(--color-accent-seed);
+    outline-offset: 2px;
+}
+
+.harvestable {
+    border-color: var(--color-border-accent);
+    box-shadow: var(--shadow-glow-gold);
+}
+
+.harvestable:hover {
+    box-shadow:
+        var(--shadow-glow-gold),
+        var(--shadow-md);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+}
+
+.emoji {
+    font-size: 1.5rem;
+}
+
+.waterings {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    background: var(--color-bg-tertiary);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-full);
+}
+
+.title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-2);
+    color: var(--color-text-primary);
+    line-height: var(--line-height-tight);
+}
+
+.origin {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-4);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.actions {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.compostBtn {
+    opacity: 0.5;
+    transition: opacity var(--transition-fast);
+}
+
+.compostBtn:hover {
+    opacity: 1;
+}

@@ -16,6 +16,13 @@ All notable changes to the Idea Garden project.
 - **Design System** - Vanilla CSS with glassmorphism, dark mode first
 - **Landing page** - Hero, How It Works, Features, Stats sections
 - Inter + JetBrains Mono fonts via next/font
+- **Docker Compose** - PostgreSQL 16 + Redis 7 for local dev
+- **Dockerfile** - Multi-stage production build
+- **Prisma 7** - Database ORM with PostgreSQL adapter
+- **Core Models** - User, Seed, WateringLog, Tag, Achievement, Streak
+- **Project Structure** - components, lib/services, lib/db, types
+- **SeedCard Component** - First UI component with garden styling
+- **Micro-animations** - Plant, water, grow, harvest animations
 
 ### Changed
 - Removed Tailwind CSS in favor of vanilla CSS per spec
@@ -26,6 +33,35 @@ All notable changes to the Idea Garden project.
 ---
 
 ## Session Log
+
+### 2026-01-19 (Session 3) - Docker + Prisma + Structure
+
+**Session Duration:** ~25 min
+
+**Completed:**
+- Task 0.2: Set up project structure
+  - Created folder hierarchy (components/, lib/, types/, styles/)
+  - Set up component barrel exports
+  - Created TypeScript types for domain models
+- Task 0.4: Set up Docker + Prisma
+  - Docker Compose for PostgreSQL 16 + Redis 7
+  - Production Dockerfile with multi-stage build
+  - Prisma 7 with pg adapter
+  - Database migration applied
+- Task 0.5: Created core data models
+  - User, Seed, WateringLog (core)
+  - Tag, SeedTag (organization)
+  - Achievement, UserAchievement, Streak (gamification)
+  - Proper indexes and relations
+- Created SeedCard component with styling
+- Created utility functions (dates, XP, Jaccard similarity)
+- Created animations.css with micro-interactions
+
+**Next Session:**
+- Task 0.6: Final git commit
+- Start Phase 1: Core Engine
+
+---
 
 ### 2026-01-19 (Session 2) - Next.js Init + Design System
 
