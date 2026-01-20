@@ -7,13 +7,7 @@
 
 import { GardenService } from './garden-service';
 import { SimilarityService, SimilarSeedResult } from './similarity-service';
-import {
-    Seed,
-    GardenOverview,
-    Author,
-    SeedStatus,
-    SeedSection
-} from '@/types';
+import { Seed, GardenOverview, Author } from '@/types';
 
 export class UnifiedGardenService {
     private gardenService: GardenService;

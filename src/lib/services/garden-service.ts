@@ -8,7 +8,6 @@
 import prisma from '@/lib/db/prisma';
 import {
     Seed,
-    SeedStatus,
     SeedSection,
     Author,
     GardenOverview
@@ -114,7 +113,7 @@ export class GardenService {
     /**
      * Update a seed
      */
-    async updateSeed(seedId: string, data: any): Promise<Seed> {
+    async updateSeed(seedId: string, data: Partial<Seed>): Promise<Seed> {
         const seed = await prisma.seed.update({
             where: { id: seedId },
             data,
