@@ -34,6 +34,39 @@ All notable changes to the Idea Garden project.
 
 ## Session Log
 
+### 2026-01-19 (Session 4) - Phase 1: Core Engine
+
+**Session Duration:** ~45 min
+
+**Completed:**
+- **GardenService Implementation** (Tasks 1.1-1.4):
+  - `plantSeed`: Create new ideas with initial origin thought.
+  - `waterSeed`: Add new thoughts to ideas with automatic promotion logic.
+    - SEEDS → SPROUTING (3 waterings)
+    - SPROUTING → READY_TO_HARVEST (5 waterings)
+  - `harvestSeed`: Move mature ideas to the harvest state.
+  - `compostSeed`: Discard ideas with auto-purge (limit 5).
+- **SimilarityService Implementation** (Task 1.5):
+  - Keyword extraction with curated stopwords.
+  - Jaccard similarity index for finding related ideas.
+- **UnifiedGardenService** (Task 1.7):
+  - Orchestration of garden and similarity services.
+  - High-level actions for plant, water, harvest, compost, and merge.
+  - Consolidation suggestions for similar ideas.
+- **Testing Suite** (Task 1.8):
+  - Set up Jest + ts-jest.
+  - Unit tests for SimilarityService.
+  - Integration tests for GardenService (CRUD + promotion logic).
+  - All 11 tests passing.
+- **Gamification Foundation**:
+  - XP and Leveling logic implemented in GardenService.
+
+**Next Session:**
+- Start Phase 2: REST API
+- Implement NextAuth.js foundation
+
+---
+
 ### 2026-01-19 (Session 3) - Docker + Prisma + Structure
 
 **Session Duration:** ~25 min
