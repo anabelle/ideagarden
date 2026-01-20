@@ -15,6 +15,7 @@ import { useSWRConfig } from 'swr';
 import { notifyGardenUpdate } from '@/lib/hooks/useGarden';
 import { ExperienceBar } from '@/components/gamification/ExperienceBar';
 import { BadgeList } from '@/components/gamification/BadgeList';
+import { StatsPanel } from '@/components/gamification/StatsPanel';
 import { useToast } from '@/components/ui/ToastProvider';
 import type { Seed } from '@/types';
 
@@ -208,6 +209,17 @@ function GardenContent() {
             {/* Badges */}
             <div className="mb-8">
                 <BadgeList unlockedNames={garden.stats.achievements} />
+            </div>
+
+            {/* Stats Panel */}
+            <div className="mb-8">
+                <StatsPanel
+                    seeds={garden.seeds}
+                    sprouting={garden.sprouting}
+                    readyToHarvest={garden.readyToHarvest}
+                    composted={garden.composted}
+                    harvestedCount={garden.stats.totalHarvested}
+                />
             </div>
 
             {/* Garden Stats Bar */}
