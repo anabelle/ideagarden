@@ -23,9 +23,23 @@ All notable changes to the Idea Garden project.
 - **Project Structure** - components, lib/services, lib/db, types
 - **SeedCard Component** - First UI component with garden styling
 - **Micro-animations** - Plant, water, grow, harvest animations
+- **REST API Suite** (Phase 2):
+  - `GET /api/garden`: Full garden state and stats
+  - `POST /api/garden/plant`: Duplicate detection & similarity engine integration
+  - `POST /api/garden/water`: Thought persistence & promotion
+  - `POST /api/garden/harvest`: Maturity check & celebration
+  - `POST /api/garden/compost`: Discard logic
+  - `POST /api/garden/merge`: Seed consolidation
+  - `GET /api/garden/consolidate`: AI-powered merge suggestions
+- **Authentication System**:
+  - NextAuth.js (Auth.js) v5 with Prisma Adapter
+  - Development Credentials provider
+  - Type-safe session extensions (User ID)
+  - `getAuthenticatedUser` middleware helper for API routes
 
 ### Changed
 - Removed Tailwind CSS in favor of vanilla CSS per spec
+- Updated Jest config to support ESM packages (next-auth)
 
 ### Fixed
 - N/A
@@ -33,6 +47,36 @@ All notable changes to the Idea Garden project.
 ---
 
 ## Session Log
+
+### 2026-01-19 (Session 5) - Phase 2: REST API
+
+**Session Duration:** ~40 min
+
+**Completed:**
+- **Full REST API Implementation** (Tasks 2.1-2.7):
+  - Created all 7 garden endpoints in App Router.
+  - Implemented request validation and standardized error responses.
+  - Integrated GardenService with API routes.
+- **Authentication Foundation** (Task 2.8):
+  - Installed and configured NextAuth.js v5.
+  - Set up Prisma Adapter for user persistence.
+  - Created `auth-middleware.ts` for unified session/header authentication.
+  - Extended NextAuth types with user ID.
+- **Integration Testing** (Task 2.9):
+  - Created comprehensive API test suite in `src/app/api/garden/__tests__/api.test.ts`.
+  - Mocked NextAuth to avoid ESM/Jest transformation issues.
+  - Set up per-test user creation/cleanup with Prisma.
+  - All 18 API tests passing.
+- **Tooling Fixes**:
+  - Updated `jest.config.js` to handle ESM dependencies.
+  - Fixed lint errors in core engine.
+
+**Next Session:**
+- Start Phase 3: Web UI - Foundation
+- Create main layout and navigation
+- Build dashboard view
+
+---
 
 ### 2026-01-19 (Session 4) - Phase 1: Core Engine
 

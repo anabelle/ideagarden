@@ -6,15 +6,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { garden } from '@/lib/services';
+import { getAuthenticatedUser, isAuthError } from '@/lib/auth-middleware';
 import type { GardenOverview } from '@/types';
-
-// TODO: Replace with real auth in Task 2.8
-async function getUserId(request: NextRequest): Promise<string | null> {
-    // Temporary: Read from header or query param for testing
-    const userId = request.headers.get('x-user-id')
-        || request.nextUrl.searchParams.get('userId');
-    return userId;
-}
 
 /**
  * GET /api/garden
@@ -29,15 +22,13 @@ async function getUserId(request: NextRequest): Promise<string | null> {
  */
 export async function GET(request: NextRequest): Promise<NextResponse<GardenOverview | { error: string }>> {
     try {
-        const userId = await getUserId(request);
+        const authResult = await getAuthenticatedUser(request);
 
-        if (!userId) {
-            return NextResponse.json(
-                { error: 'Unauthorized: User ID required' },
-                { status: 401 }
-            );
+        if (isAuthError(authResult)) {
+            return authResult.error;
         }
 
+        const userId = authResult.userId;
         const gardenState = await garden.getGarden(userId);
 
         return NextResponse.json(gardenState, { status: 200 });

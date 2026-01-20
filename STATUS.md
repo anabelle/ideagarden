@@ -40,23 +40,23 @@
 
 ---
 
-## Current Phase: Phase 2 - REST API 🚧
+## Current Phase: Phase 2 - REST API ✅
 
-**Progress:** 1/9 tasks complete (11%)
+**Progress:** 9/9 tasks complete (100%)
 
 ### Tasks
 
 | # | Task | Status | Assigned | Notes |
 |---|------|--------|----------|-------|
 | 2.1 | GET /api/garden | [x] | - | ✅ Returns garden state with stats |
-| 2.2 | POST /api/garden/plant | [ ] | - | - |
-| 2.3 | POST /api/garden/water | [ ] | - | - |
-| 2.4 | POST /api/garden/harvest | [ ] | - | - |
-| 2.5 | POST /api/garden/compost | [ ] | - | - |
-| 2.6 | POST /api/garden/merge | [ ] | - | - |
-| 2.7 | GET /api/garden/consolidate | [ ] | - | - |
-| 2.8 | Authentication middleware | [ ] | - | - |
-| 2.9 | API integration tests | [ ] | - | - |
+| 2.2 | POST /api/garden/plant | [x] | - | ✅ Plants seed with similarity check |
+| 2.3 | POST /api/garden/water | [x] | - | ✅ Adds thoughts to seeds |
+| 2.4 | POST /api/garden/harvest | [x] | - | ✅ Harvests mature seeds |
+| 2.5 | POST /api/garden/compost | [x] | - | ✅ Discards seeds |
+| 2.6 | POST /api/garden/merge | [x] | - | ✅ Merges similar seeds |
+| 2.7 | GET /api/garden/consolidate | [x] | - | ✅ AI merge suggestions |
+| 2.8 | Authentication middleware | [x] | - | ✅ NextAuth v5 + header fallback |
+| 2.9 | API integration tests | [x] | - | ✅ 18 integration tests passing |
 
 ---
 
@@ -65,7 +65,7 @@
 ```
 Phase 0: Foundation     [██████████] 100% ✅
 Phase 1: Core Engine    [██████████] 100% ✅
-Phase 2: REST API       [█░░░░░░░░░] 11%
+Phase 2: REST API       [██████████] 100% ✅
 Phase 3: UI Foundation  [░░░░░░░░░░] 0%
 Phase 4: UI Interactions[░░░░░░░░░░] 0%
 Phase 5: Gamification   [░░░░░░░░░░] 0%
@@ -80,9 +80,9 @@ Phase 10: Launch        [░░░░░░░░░░] 0%
 
 ## Next Action
 
-**Phase 2 - Task 2.2:** Implement POST /api/garden/plant
+**Phase 3 - Task 3.1:** Create app layout with navigation
 
-Run workflow: `.agent/workflows/backend.md`
+Run workflow: `.agent/workflows/frontend.md`
 
 ---
 
