@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { HarvestCelebration } from '@/components/garden/HarvestCelebration';
 import { useSWRConfig } from 'swr';
 import { notifyGardenUpdate } from '@/lib/hooks/useGarden';
+import { ExperienceBar } from '@/components/gamification/ExperienceBar';
 import type { Seed } from '@/types';
 
 // Temporary test user ID until Auth UI is ready
@@ -189,6 +190,12 @@ function GardenContent() {
                     Plant New Idea
                 </button>
             </div>
+
+            {/* XP Bar */}
+            <ExperienceBar
+                xp={garden.stats.xp}
+                level={garden.stats.level}
+            />
 
             {/* Garden Stats Bar */}
             <div className="glass-card mb-12 grid grid-cols-2 gap-4 md:grid-cols-4">

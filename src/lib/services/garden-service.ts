@@ -74,6 +74,9 @@ export class GardenService {
         // Get user streak (handle missing streak)
         const streak = await prisma.streak.findUnique({ where: { userId } });
 
+        // Get user details for XP/Level
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+
         return {
             seeds: seeds as unknown as Seed[],
             sprouting: sprouting as unknown as Seed[],
@@ -84,6 +87,8 @@ export class GardenService {
                 totalWaterings,
                 totalHarvested: harvestedSeeds.length,
                 currentStreak: streak?.currentStreak ?? 0,
+                xp: user?.xp ?? 0,
+                level: user?.level ?? 1,
             },
         };
     }

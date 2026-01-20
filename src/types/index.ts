@@ -99,6 +99,8 @@ export interface GardenOverview {
         totalWaterings: number;
         totalHarvested: number;
         currentStreak: number;
+        xp: number;
+        level: number;
     };
 }
 

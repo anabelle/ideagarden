@@ -96,6 +96,21 @@ Phase 10: Launch        [░░░░░░░░░░] 0%
 
 ---
 
+## Current Phase: Phase 5 - Gamification 🚧
+
+**Progress:** 2/4 tasks complete (50%)
+
+### Tasks
+
+| # | Task | Status | Assigned | Notes |
+|---|------|--------|----------|-------|
+| 5.1 | XP Schema & Logic | [x] | - | ✅ Integrated into Service |
+| 5.2 | XP UI (ExperienceBar) | [x] | - | ✅ Visual Progress Bar |
+| 5.3 | Badges & Achievements | [ ] | - | - |
+| 5.4 | Leaderboard/Stats | [ ] | - | - |
+
+---
+
 ## Overall Progress
 
 ```
@@ -104,7 +119,7 @@ Phase 1: Core Engine    [██████████] 100% ✅
 Phase 2: REST API       [██████████] 100% ✅
 Phase 3: UI Foundation  [██████████] 100% ✅
 Phase 4: UI Interactions[██████████] 100% ✅
-Phase 5: Gamification   [░░░░░░░░░░] 0%
+Phase 5: Gamification   [█████░░░░░] 50%
 Phase 6: Telegram Bot   [░░░░░░░░░░] 0%
 Phase 7: Mini App       [░░░░░░░░░░] 0%
 Phase 8: Onboarding     [░░░░░░░░░░] 0%
@@ -116,7 +131,7 @@ Phase 10: Launch        [░░░░░░░░░░] 0%
 
 ## Next Action
 
-**Phase 5 - Task 5.1:** XP System
+**Phase 5 - Task 5.3:** Badges & Achievements
 
 Run workflow: `.agent/workflows/frontend.md`
 
