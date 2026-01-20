@@ -269,6 +269,133 @@ if (bot) {
                 statusMsg,
                 { parse_mode: 'Markdown' }
             );
+
+        }
+    });
+
+    // HARVEST
+    bot.command('harvest', async (ctx) => {
+        const title = ctx.message.text.replace('/harvest', '').trim();
+
+        if (!title) {
+            return ctx.reply('Usage: /harvest <seed title>');
+        }
+
+        const telegramId = ctx.from!.id.toString();
+        const userName = ctx.from!.first_name;
+
+        try {
+            const user = await ensureUser(telegramId, userName);
+
+            // Need to find seed ID first since harvest requires ID?
+            // Service method: harvestSeed(userId, seedId, author)
+            // We only have title. Should lookup first.
+            const gardenData = await garden.getGarden(user.id);
+            const allSeeds = [...gardenData.seeds, ...gardenData.readyToHarvest]; // Can only harvest from these? Or sprouting too?
+            // A seed can be harvested if mature, even if not in 'readyToHarvest' section technically if logic allows.
+            // But usually we only harvest mature ones.
+            // Let's search all active ones.
+            const seed = [...allSeeds, ...gardenData.sprouting].find(s => s.title.toLowerCase() === title.toLowerCase());
+
+            if (!seed) {
+                return ctx.reply(`❌ Seed "${title}" not found or already harvested.`);
+            }
+
+            const { seed: harvestedSeed, achievements } = await garden.harvest(user.id, seed.id, 'HUMAN');
+
+            let msg = `🌸 *Harvested!*\n\n` +
+                `"${harvestedSeed.title}" has graduated to a real task!\n\n` +
+                `*Summary:*\n` +
+                `• Planted: ${new Date(harvestedSeed.plantedAt).toLocaleDateString()}\n` +
+                `• Harvested: ${new Date().toLocaleDateString()}\n` +
+                `• Waterings: ${harvestedSeed.waterings}`;
+
+            if (achievements && achievements.length > 0) {
+                msg += `\n\n🏆 *Achievements Unlocked:*\n` + achievements.map(a => `• ${a}`).join('\n');
+            }
+
+            await ctx.reply(msg, { parse_mode: 'Markdown' });
+
+        } catch (error: any) {
+            const message = error.message || 'Unknown error';
+            if (message.includes('Not enough waterings')) {
+                const user = await ensureUser(telegramId, userName);
+                // Fetch seed to show status
+                const gardenData = await garden.getGarden(user.id);
+                const seed = [...gardenData.seeds, ...gardenData.sprouting].find(s => s.title.toLowerCase() === title.toLowerCase());
+
+                if (seed) {
+                    return ctx.reply(
+                        `❌ Cannot harvest "${title}" yet.\n\n` +
+                        `Current: ${seed.waterings}/5 waterings\n` +
+                        `Need ${5 - seed.waterings} more!`
+                    );
+                }
+            }
+            await ctx.reply(`❌ Failed to harvest: ${message}`);
+        }
+    });
+
+    // COMPOST
+    bot.command('compost', async (ctx) => {
+        const title = ctx.message.text.replace('/compost', '').trim();
+
+        if (!title) {
+            return ctx.reply('Usage: /compost <seed title>');
+        }
+
+        const telegramId = ctx.from!.id.toString();
+        const userName = ctx.from!.first_name;
+
+        try {
+            const user = await ensureUser(telegramId, userName);
+            // Lookup seed
+            const gardenData = await garden.getGarden(user.id);
+            const allSeeds = [...gardenData.seeds, ...gardenData.sprouting, ...gardenData.readyToHarvest];
+            const seed = allSeeds.find(s => s.title.toLowerCase() === title.toLowerCase());
+
+            if (!seed) {
+                return ctx.reply(`❌ Seed "${title}" not found.`);
+            }
+
+            // Ask for reason? Inline buttons.
+            await ctx.reply(
+                `🍂 Composting "${seed.title}"\n\n` +
+                `Why are you archiving this seed?`,
+                {
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: 'Duplicate / Not needed', callback_data: `compost:${seed.id}:not_needed` }],
+                            [{ text: 'Already done', callback_data: `compost:${seed.id}:done` }],
+                            [{ text: 'Just archive', callback_data: `compost:${seed.id}:archive` }]
+                        ]
+                    }
+                }
+            );
+
+        } catch (e) {
+            console.error(e);
+            ctx.reply('Error finding seed.');
+        }
+    });
+
+    // COMPOST CALLBACK
+    bot.action(/compost:(.+):(.+)/, async (ctx) => {
+        const [, seedId, reason] = ctx.match;
+        const telegramId = ctx.from!.id.toString();
+
+        try {
+            const user = await ensureUser(telegramId);
+            await garden.compost(user.id, seedId, reason, 'HUMAN');
+
+            await ctx.editMessageText(
+                `🍂 *Composted!*\n\nSeed has been archived.`,
+                { parse_mode: 'Markdown' }
+            );
+        } catch (e) {
+            console.error(e);
+            ctx.answerCbQuery('Failed to compost');
         }
     });
 }
+
